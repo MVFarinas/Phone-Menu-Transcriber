@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phone-menu-transcriber"
+version = "0.1.0"
+description = "Transcribe a recorded phone menu and extract its press-N options using Whisper and a local LLM."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Mark" }]
+keywords = ["whisper", "transcription", "llm", "ollama", "phone-menu", "ivr"]
+
+dependencies = [
+    "openai-whisper>=20231117",
+    "pydantic>=2.6",
+    "httpx>=0.27",
+    "fastapi>=0.110",
+    "python-multipart>=0.0.9",
+    "uvicorn[standard]>=0.29",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "black>=24.0",
+    "mypy>=1.9",
+    "pre-commit>=3.6",
+]
+
+[project.scripts]
+phone-menu-transcriber = "phone_menu_transcriber.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/markf/Phone-Menu-Transcriber"
+
+[tool.setuptools.packages.find]
+include = ["phone_menu_transcriber*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+# B008: FastAPI relies on function calls (File(), Query(), Depends()) in argument
+# defaults for dependency injection — this is the framework's intended pattern.
+ignore = ["B008"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=phone_menu_transcriber --cov-report=term-missing"
