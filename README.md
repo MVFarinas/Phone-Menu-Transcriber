@@ -139,3 +139,24 @@ The `examples/` folder contains:
 - **Phase 1 (done):** tested, typed, packaged backend with a pluggable LLM extractor and FastAPI service.
 - **Phase 2:** Dockerize and deploy the API to the cloud.
 - **Phase 3:** Flutter (Dart) iOS/Android app over the API.
+
+## Hardware integration (Cyberdeck, Phase A)
+
+This project is also the software payload for a planned "offline AI deck," a self-contained,
+no-internet field device that runs the full transcribe -> extract pipeline on portable hardware.
+Because the whole stack (Whisper plus a local Ollama model) already runs offline, no rebuild is
+needed here; the deck work is hardware and integration only.
+
+Independent work this repo needs to support that build:
+
+- Generalize the framing beyond phone menus to a broader "voice -> structured notes" tool. The
+  pipeline is unchanged, but the CLI help text, API docs, and examples currently assume IVR input.
+- Add a headless / kiosk run mode suitable for a small built-in touchscreen (auto-start the API,
+  render the JSON result on-device with no browser).
+- Document and test a low-resource model path (`qwen3:4b` or `qwen3:1.7b`) so the deck can run on a
+  Pi 5 instead of a mini-PC, trading accuracy for portability. Capture the accuracy difference.
+- Confirm a fully offline boot: record via a built-in mic and produce structured output with
+  networking physically disabled.
+
+Cross-repo context and the two-phase build plan live in the knowledge base under
+`projects/cyberdeck/`.
