@@ -12,8 +12,6 @@ from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
 from phone_menu_transcriber import api
-from phone_menu_transcriber.api import WhisperModel
-from phone_menu_transcriber.cli import WHISPER_MODELS
 from phone_menu_transcriber.extraction import ExtractionError
 from phone_menu_transcriber.models import MenuResult
 from tests.conftest import EXPECTED_OPTIONS
@@ -64,11 +62,6 @@ def test_transcribe_rejects_unknown_model() -> None:
         files={"file": ("clip.wav", b"RIFF....")},
     )
     assert response.status_code == 422
-
-
-def test_whisper_model_enum_matches_cli_choices() -> None:
-    """The API enum and the CLI's argparse choices must offer the same models."""
-    assert [m.value for m in WhisperModel] == WHISPER_MODELS
 
 
 def test_transcribe_is_not_a_coroutine() -> None:

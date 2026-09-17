@@ -6,33 +6,12 @@ import argparse
 import os
 import sys
 
-from phone_menu_transcriber.extraction import ExtractionError, Extractor, build_extractor
-from phone_menu_transcriber.models import MenuResult
-from phone_menu_transcriber.transcription import transcribe_audio
-
-WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"]
-
-
-def transcribe_and_extract(
-    audio_file: str,
-    whisper_model: str = "base",
-    extractor: Extractor | None = None,
-) -> MenuResult:
-    """Transcribe ``audio_file`` and extract its menu options.
-
-    Shared by the CLI and the API so there is a single source of truth.
-
-    The transcript is stamped onto the result here rather than taken from the
-    extractor. The ``Extractor`` protocol only promises options, so a backend
-    that left ``raw_transcript`` unset would otherwise be indistinguishable from
-    silence to every caller downstream.
-    """
-    extractor = extractor or build_extractor()
-    transcript = transcribe_audio(audio_file, whisper_model)
-    if not transcript.strip():
-        return MenuResult(options=[], raw_transcript=transcript)
-    result = extractor.extract(transcript)
-    return result.model_copy(update={"raw_transcript": transcript})
+from phone_menu_transcriber.extraction import ExtractionError
+from phone_menu_transcriber.pipeline import (
+    DEFAULT_WHISPER_MODEL,
+    WHISPER_MODELS,
+    transcribe_and_extract,
+)
 
 
 def main() -> None:
@@ -44,8 +23,10 @@ def main() -> None:
     parser.add_argument(
         "--model",
         choices=WHISPER_MODELS,
-        default="base",
-        help="Whisper model size (default: base)",
+        default=DEFAULT_WHISPER_MODEL.value,
+        metavar="MODEL",
+        help=f"Whisper model size (default: {DEFAULT_WHISPER_MODEL.value}). "
+        f"Choices: {', '.join(WHISPER_MODELS)}",
     )
     args = parser.parse_args()
 
