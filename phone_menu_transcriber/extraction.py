@@ -15,7 +15,7 @@ from typing import Protocol
 import httpx
 from pydantic import ValidationError
 
-from phone_menu_transcriber.models import MenuResult
+from phone_menu_transcriber.models import MenuOption, MenuResult
 
 DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 DEFAULT_MODEL = "qwen3:8b"
@@ -46,14 +46,14 @@ class Extractor(Protocol):
 def _menu_options_schema() -> dict[str, object]:
     """JSON schema describing just the ``options`` the model must produce.
 
-    Derived from the Pydantic model so the schema and the validation target
-    never drift apart.
+    Taken straight from the Pydantic model so the schema and the validation
+    target never drift apart. That includes the key pattern, which constrains
+    the model while it generates rather than only rejecting it afterwards.
     """
-    option_schema = MenuResult.model_json_schema()["$defs"]["MenuOption"]
     return {
         "type": "object",
         "properties": {
-            "options": {"type": "array", "items": option_schema},
+            "options": {"type": "array", "items": MenuOption.model_json_schema()},
         },
         "required": ["options"],
     }

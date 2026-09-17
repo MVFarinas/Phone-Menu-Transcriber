@@ -13,7 +13,7 @@ authors = [{ name = "Mark" }]
 keywords = ["whisper", "transcription", "llm", "ollama", "phone-menu", "ivr"]
 
 dependencies = [
-    "openai-whisper>=20231117",
+    "openai-whisper>=20240930",  # first release with the distilled `turbo` models
     "pydantic>=2.6",
     "httpx>=0.27",
     "fastapi>=0.110",

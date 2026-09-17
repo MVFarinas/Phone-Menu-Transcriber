@@ -4,32 +4,19 @@ from __future__ import annotations
 
 import os
 import tempfile
-from enum import Enum
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 
-from phone_menu_transcriber.cli import transcribe_and_extract
 from phone_menu_transcriber.extraction import ExtractionError
 from phone_menu_transcriber.models import MenuResult
+from phone_menu_transcriber.pipeline import (
+    DEFAULT_WHISPER_MODEL,
+    WhisperModel,
+    transcribe_and_extract,
+)
 
 DEFAULT_MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # ~25 minutes of phone-quality audio
 _CHUNK_BYTES = 1024 * 1024
-
-
-class WhisperModel(str, Enum):
-    """Whisper model sizes the service accepts.
-
-    Declaring these as an enum (rather than validating a bare ``str`` by hand)
-    puts the valid values in the OpenAPI schema and lets FastAPI reject the rest.
-    A test keeps this in step with ``WHISPER_MODELS`` so the two cannot drift.
-    """
-
-    TINY = "tiny"
-    BASE = "base"
-    SMALL = "small"
-    MEDIUM = "medium"
-    LARGE = "large"
-
 
 app = FastAPI(
     title="Phone Menu Transcriber",
@@ -77,7 +64,7 @@ def health() -> dict[str, str]:
 @app.post("/transcribe", response_model=MenuResult)
 def transcribe(
     file: UploadFile = File(..., description="Audio file (.wav, .mp3, etc.)"),
-    model: WhisperModel = Query(WhisperModel.BASE, description="Whisper model size"),
+    model: WhisperModel = Query(DEFAULT_WHISPER_MODEL, description="Whisper model size"),
 ) -> MenuResult:
     """Transcribe an uploaded audio file and return its structured menu options.
 
