@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Protocol
+from typing import Any, Protocol
 
 import httpx
 from pydantic import ValidationError
@@ -43,7 +43,7 @@ class Extractor(Protocol):
         ...
 
 
-def _menu_options_schema() -> dict[str, object]:
+def _menu_options_schema() -> dict[str, Any]:
     """JSON schema describing just the ``options`` the model must produce.
 
     Taken straight from the Pydantic model so the schema and the validation

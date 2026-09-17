@@ -71,9 +71,10 @@ def test_action_is_stripped() -> None:
 @pytest.mark.parametrize(("raw", "expected"), [(1, "1"), (0, "0"), (12, "12")])
 def test_integer_keys_are_coerced(raw: int, expected: str) -> None:
     """Models emit `{"key": 1}` even under a string schema; don't lose the menu."""
-    assert MenuOption(key=raw, action="Sales").key == expected
+    # Deliberately the wrong static type: the point is that it is coerced.
+    assert MenuOption(key=raw, action="Sales").key == expected  # type: ignore[arg-type]
 
 
 def test_non_string_keys_are_still_rejected() -> None:
     with pytest.raises(ValidationError):
-        MenuOption(key=["1"], action="Sales")
+        MenuOption(key=["1"], action="Sales")  # type: ignore[arg-type]

@@ -12,6 +12,7 @@ from phone_menu_transcriber.pipeline import (
     WHISPER_MODELS,
     transcribe_and_extract,
 )
+from phone_menu_transcriber.transcription import TranscriptionError
 
 
 def main() -> None:
@@ -35,7 +36,7 @@ def main() -> None:
 
     try:
         result = transcribe_and_extract(args.audio_file, args.model)
-    except ExtractionError as exc:
+    except (ExtractionError, TranscriptionError) as exc:
         sys.exit(str(exc))
 
     if not result.raw_transcript.strip():

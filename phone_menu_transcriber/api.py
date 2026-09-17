@@ -14,6 +14,7 @@ from phone_menu_transcriber.pipeline import (
     WhisperModel,
     transcribe_and_extract,
 )
+from phone_menu_transcriber.transcription import TranscriptionError
 
 DEFAULT_MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # ~25 minutes of phone-quality audio
 _CHUNK_BYTES = 1024 * 1024
@@ -83,6 +84,11 @@ def transcribe(
         return transcribe_and_extract(tmp_path, model.value)
     except ExtractionError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except TranscriptionError as exc:
+        # The backend itself is missing or broken — a deployment fault, and it
+        # must be caught before the RuntimeError clause below reads it as a bad
+        # upload.
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except (OSError, RuntimeError) as exc:
         # Whisper shells out to ffmpeg and raises RuntimeError when it cannot
         # decode the input — an unusable upload is the client's problem, not a

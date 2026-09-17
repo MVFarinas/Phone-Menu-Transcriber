@@ -7,13 +7,12 @@ name = "phone-menu-transcriber"
 version = "0.1.0"
 description = "Transcribe a recorded phone menu and extract its press-N options using Whisper and a local LLM."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Mark" }]
 keywords = ["whisper", "transcription", "llm", "ollama", "phone-menu", "ivr"]
 
 dependencies = [
-    "openai-whisper>=20240930",  # first release with the distilled `turbo` models
     "pydantic>=2.6",
     "httpx>=0.27",
     "fastapi>=0.110",
@@ -22,11 +21,16 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Speech-to-text pulls in torch (~2.5 GB). transcription.py imports Whisper
+# lazily, so everything else -- models, extractor, API wiring -- installs,
+# type-checks and tests without any of it.
+whisper = [
+    "openai-whisper>=20240930",  # first release with the distilled `turbo` models
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=4.1",
     "ruff>=0.4",
-    "black>=24.0",
     "mypy>=1.9",
     "pre-commit>=3.6",
 ]
@@ -35,14 +39,14 @@ dev = [
 phone-menu-transcriber = "phone_menu_transcriber.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/markf/Phone-Menu-Transcriber"
+Homepage = "https://github.com/MVFarinas/Phone-Menu-Transcriber"
 
 [tool.setuptools.packages.find]
 include = ["phone_menu_transcriber*"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "W"]
@@ -50,12 +54,8 @@ select = ["E", "F", "I", "UP", "B", "W"]
 # defaults for dependency injection — this is the framework's intended pattern.
 ignore = ["B008"]
 
-[tool.black]
-line-length = 100
-target-version = ["py39"]
-
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.10"  # matches requires-python
 strict = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
@@ -63,4 +63,4 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=phone_menu_transcriber --cov-report=term-missing"
+addopts = "--cov=phone_menu_transcriber --cov-report=term-missing --cov-fail-under=90"

@@ -6,15 +6,16 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
-      - id: black
-
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
     hooks:
       - id: mypy
+        # These must match what CI installs. With them missing, mypy resolves
+        # fastapi and httpx to Any under ignore_missing_imports and the hook
+        # quietly passes things CI then fails on.
         additional_dependencies:
           - pydantic>=2.6
-        exclude: ^(tests/|src/)
+          - fastapi>=0.110
+          - httpx>=0.27
+          - pytest>=8.0
+        exclude: ^src/
