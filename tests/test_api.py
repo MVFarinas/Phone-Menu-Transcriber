@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from phone_menu_transcriber import api
 from phone_menu_transcriber.extraction import ExtractionError
 from phone_menu_transcriber.models import MenuResult
+from phone_menu_transcriber.transcription import TranscriptionError
 from tests.conftest import EXPECTED_OPTIONS
 
 client = TestClient(api.app)
@@ -140,3 +141,15 @@ def test_spool_to_disk_cleans_up_a_partial_write(
         api._spool_to_disk(cast(UploadFile, _ExplodingUpload()), ".wav", 1_000_000)
 
     assert list(tmp_path.iterdir()) == []
+
+
+def test_transcribe_503_when_whisper_is_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A missing backend is a deployment fault, not a bad upload."""
+
+    def _boom(*_a: object, **_k: object) -> MenuResult:
+        raise TranscriptionError("Whisper is not installed")
+
+    monkeypatch.setattr(api, "transcribe_and_extract", _boom)
+    response = client.post("/transcribe", files={"file": ("clip.wav", b"RIFF")})
+    assert response.status_code == 503
+    assert "not installed" in response.json()["detail"]
