@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from phone_menu_transcriber import cli
+from phone_menu_transcriber.models import MenuOption, MenuResult
 from tests.conftest import EXPECTED_OPTIONS, FakeExtractor
 
 
@@ -17,6 +18,27 @@ def test_transcribe_and_extract_happy_path(
 
     assert result.options == EXPECTED_OPTIONS
     assert result.raw_transcript == example_transcript
+
+
+def test_transcribe_and_extract_stamps_the_transcript(
+    monkeypatch: pytest.MonkeyPatch, example_transcript: str
+) -> None:
+    """The transcript must survive an extractor that does not echo it back.
+
+    ``Extractor`` only promises options, so a backend returning a bare
+    ``MenuResult`` used to make a real menu look like silence to the API.
+    """
+
+    class SilentExtractor:
+        def extract(self, transcript: str) -> MenuResult:
+            return MenuResult(options=[MenuOption(key="1", action="Sales")])
+
+    monkeypatch.setattr(cli, "transcribe_audio", lambda *_a, **_k: example_transcript)
+
+    result = cli.transcribe_and_extract("ignored.wav", extractor=SilentExtractor())
+
+    assert result.raw_transcript == example_transcript
+    assert len(result.options) == 1
 
 
 def test_transcribe_and_extract_skips_llm_on_silence(
