@@ -1,8 +1,0 @@
-Example Input prompt from audio file
-
-prompt = ("Please listen carefully as our menu options have changed. "
-          "For residential sales, please press 1. For installer and integrator sales, press 2. "
-          "For product questions or technical support, please press 3. If you have a question about an existing order, "
-          "or for any other customer service inquiries, press 4. If you are a current supplier, please press 5. "
-          "If you are a freight carrier and need to schedule a delivery appointment, press 6. "
-          "All other calls, press 7.")
