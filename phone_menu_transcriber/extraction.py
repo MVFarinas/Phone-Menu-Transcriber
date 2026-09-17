@@ -13,6 +13,7 @@ import os
 from typing import Any, Protocol
 
 import httpx
+from dotenv import find_dotenv, load_dotenv
 from pydantic import ValidationError
 
 from phone_menu_transcriber.models import MenuOption, MenuResult
@@ -120,6 +121,12 @@ def build_extractor() -> Extractor:
         EXTRACTOR_MODEL:   model name (default 'qwen3:8b').
         OLLAMA_BASE_URL:   Ollama server URL (default 'http://localhost:11434').
     """
+    # The README has always told people to copy .env.example to .env; until
+    # now nothing read it. usecwd=True resolves it against the directory the
+    # user is working in rather than wherever the package happens to be
+    # installed, and real environment variables still win over the file.
+    load_dotenv(find_dotenv(usecwd=True))
+
     backend = os.environ.get("EXTRACTOR_BACKEND", "ollama").lower()
     model = os.environ.get("EXTRACTOR_MODEL", DEFAULT_MODEL)
 

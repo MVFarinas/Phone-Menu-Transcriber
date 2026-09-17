@@ -14,6 +14,7 @@ keywords = ["whisper", "transcription", "llm", "ollama", "phone-menu", "ivr"]
 
 dependencies = [
     "pydantic>=2.6",
+    "python-dotenv>=1.0",
     "httpx>=0.27",
     "fastapi>=0.110",
     "python-multipart>=0.0.9",

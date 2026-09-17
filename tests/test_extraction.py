@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -106,3 +107,34 @@ def test_build_extractor_unknown_backend(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setenv("EXTRACTOR_BACKEND", "bogus")
     with pytest.raises(ExtractionError, match="Unknown EXTRACTOR_BACKEND"):
         build_extractor()
+
+
+def test_build_extractor_reads_a_dotenv_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Copying .env.example to .env should actually do something."""
+    for name in ("EXTRACTOR_BACKEND", "EXTRACTOR_MODEL", "OLLAMA_BASE_URL"):
+        monkeypatch.delenv(name, raising=False)
+    (tmp_path / ".env").write_text(
+        "EXTRACTOR_MODEL=qwen3:4b\nOLLAMA_BASE_URL=http://deck.local:11434\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    extractor = build_extractor()
+
+    assert isinstance(extractor, OllamaExtractor)
+    assert extractor.model == "qwen3:4b"
+    assert extractor.base_url == "http://deck.local:11434"
+
+
+def test_real_environment_beats_the_dotenv_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    (tmp_path / ".env").write_text("EXTRACTOR_MODEL=from-file\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("EXTRACTOR_MODEL", "from-environment")
+
+    extractor = build_extractor()
+
+    assert isinstance(extractor, OllamaExtractor)
+    assert extractor.model == "from-environment"

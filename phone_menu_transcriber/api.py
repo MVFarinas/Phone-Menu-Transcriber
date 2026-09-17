@@ -7,6 +7,7 @@ import tempfile
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 
+from phone_menu_transcriber import __version__
 from phone_menu_transcriber.extraction import ExtractionError
 from phone_menu_transcriber.models import MenuResult
 from phone_menu_transcriber.pipeline import (
@@ -22,7 +23,7 @@ _CHUNK_BYTES = 1024 * 1024
 app = FastAPI(
     title="Phone Menu Transcriber",
     description="Transcribe a phone-menu recording and extract its press-N options.",
-    version="0.1.0",
+    version=__version__,
 )
 
 
