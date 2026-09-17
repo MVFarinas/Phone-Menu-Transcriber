@@ -21,12 +21,18 @@ def transcribe_and_extract(
     """Transcribe ``audio_file`` and extract its menu options.
 
     Shared by the CLI and the API so there is a single source of truth.
+
+    The transcript is stamped onto the result here rather than taken from the
+    extractor. The ``Extractor`` protocol only promises options, so a backend
+    that left ``raw_transcript`` unset would otherwise be indistinguishable from
+    silence to every caller downstream.
     """
     extractor = extractor or build_extractor()
     transcript = transcribe_audio(audio_file, whisper_model)
     if not transcript.strip():
         return MenuResult(options=[], raw_transcript=transcript)
-    return extractor.extract(transcript)
+    result = extractor.extract(transcript)
+    return result.model_copy(update={"raw_transcript": transcript})
 
 
 def main() -> None:
